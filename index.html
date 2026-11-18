@@ -288,7 +288,7 @@ canvas.addEventListener("pointermove",e=>{
 if(!dragging) return;
 const dx=e.clientX-lastX;
 const dy=e.clientY-lastY;
-longitude-=dx/zoom0.8;
+longitude-=dx/zoom*0.8;
 latitude=Math.max(-85,Math.min(
 85,latitude+dy/zoom*0.8
 ));
