@@ -43,6 +43,8 @@ h1 {
     color: #000080;
     text-align: center;
     font-size: 40px;
+   border-bottom: 3px solid #000080;
+   padding-bottom: 15px;
 }
 
 p {
