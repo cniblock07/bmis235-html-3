@@ -35,7 +35,313 @@
 <!-- ===== SAVE THIS SPACE ==============================================
      This box is empty on purpose. Leave it here. We will use it later.
      ===================================================================== -->
-<div class="showcase"></div>
+<div class="showcase"><!-- HTML: Interactive hobby globe -->
+<div class="globe-card">
+<h2>My Adventures</h2>
+<div class="globe-filters">
+<button data-hobby="All">All</button>
+<button data-hobby="Golf">🟢 Golf</button>
+<button data-hobby="Fishing">🔵 Fishing</button>
+<button data-hobby="Hiking">🟠 Hiking</button>
+</div>
+<canvas id="hobbyGlobe" width="600" height="310"></canvas>
+<div class="globe-controls">
+<button id="zoomOut">−</button>
+<button id="resetGlobe">Reset</button>
+<button id="zoomIn">+</button>
+</div>
+<div id="globeInfo">
+Drag the globe and click a pin!
+</div>
+</div>
+<!-- CSS: Match the website brand -->
+<style>
+.showcase .globe-card {
+font-family: Georgia, serif;
+color: #000080;
+background: #f0f4f8;
+border-radius: 15px;
+padding: 10px;
+text-align: center;
+max-width: 650px;
+margin: 20px auto;
+height: 460px;
+box-sizing: border-box;
+}
+.showcase h2 {
+margin: 4px 0 10px;
+}
+.showcase .globe-filters {
+display: flex;
+justify-content: center;
+flex-wrap: wrap;
+gap: 4px;
+}
+.showcase button {
+font-family: Georgia, serif;
+background: #000080;
+color: white;
+border: none;
+padding: 7px 10px;
+border-radius: 7px;
+cursor: pointer;
+}
+.showcase button:hover {
+background: #4040a0;
+}
+.showcase canvas {
+width: 100%;
+height: auto;
+max-height: 310px;
+touch-action: none;
+cursor: grab;
+}
+.showcase .globe-controls {
+margin: 3px 0;
+}
+.showcase #globeInfo {
+font-size: 14px;
+margin-top: 7px;
+}
+</style>
+<!-- JavaScript: Rotate, zoom and display locations -->
+<script>
+(function () {
+const canvas = document.getElementById("hobbyGlobe");
+const ctx = canvas.getContext("2d");
+const info = document.getElementById("globeInfo");
+let longitude = -118;
+let latitude = 43;
+let zoom = 1.8;
+let filter = "All";
+let visiblePins = [];
+const colors = {
+Golf: "#16a34a",
+Fishing: "#2563eb",
+Hiking: "#f97316"
+};
+// Name, latitude, longitude, hobby
+const locations = [
+["Spokane Golf Courses",47.66,-117.43,"Golf"],
+["The Highlands",47.72,-116.90,"Golf"],
+["Stoneridge",48.01,-117.03,"Golf"],
+["Chewelah",48.32,-117.73,"Golf"],
+["Palouse Ridge",46.73,-117.15,"Golf"],
+["Lewiston",46.39,-117.00,"Golf"],
+["Maui Golf",20.90,-156.65,"Golf"],
+["Spokane Area Lakes",47.57,-117.55,"Fishing"],
+["Columbia River",47.95,-118.35,"Fishing"],
+["Snake River",46.70,-117.43,"Fishing"],
+["Lake Roosevelt",48.10,-118.30,"Fishing"],
+["The Enchantments",47.48,-120.80,"Hiking"],
+["Priest Lake",48.57,-116.85,"Hiking"],
+["Spokane Hiking",47.80,-117.50,"Hiking"],
+["Maui Hiking",20.75,-156.25,"Hiking"],
+["Mauna Kea",19.82,-155.47,"Hiking"]
+];
+// Simplified continent outlines
+const land = [
+[[-168,66],[-155,72],[-125,72],[-95,80],
+[-65,76],[-60,52],[-80,45],[-81,25],
+[-96,19],[-87,15],[-83,9],[-100,20],
+[-117,32],[-125,49],[-140,60],[-168,66]],
+[[-81,10],[-60,12],[-35,-6],[-40,-22],
+[-55,-40],[-68,-55],[-75,-32],[-81,10]],
+[[-10,36],[-17,15],[-10,0],[18,-35],
+[33,-28],[50,10],[32,31],[-10,36]],
+[[-10,36],[-10,58],[30,72],[95,77],
+[170,65],[145,42],[120,22],[105,8],
+[80,8],[65,25],[40,30],[30,40],[-10,36]],
+[[112,-12],[153,-10],[153,-39],
+[115,-35],[112,-12]],
+[[-73,60],[-55,83],[-20,77],[-42,60]]
+];
+function project(lon, lat) {
+const r = Math.PI / 180;
+const a = (lon - longitude) * r;
+const b = lat * r;
+const t = latitude * r;
+const radius = 138 * zoom;
+return {
+x: 300 + radius * Math.cos(b) * Math.sin(a),
+y: 155 - radius * (
+Math.cos(t) * Math.sin(b) -
+Math.sin(t) * Math.cos(b) * Math.cos(a)
+),
+z: Math.sin(t) * Math.sin(b) +
+Math.cos(t) * Math.cos(b) * Math.cos(a)
+};
+}
+function draw() {
+ctx.clearRect(0, 0, 600, 310);
+visiblePins = [];
+ctx.save();
+ctx.beginPath();
+ctx.arc(300,155,138zoom,0,Math.PI2);
+ctx.clip();
+const ocean = ctx.createRadialGradient(
+240,90,10,300,155,138zoom
+);
+ocean.addColorStop(0,"#c5e5f5");
+ocean.addColorStop(1,"#4389b9");
+ctx.fillStyle = ocean;
+ctx.fillRect(0,0,600,310);
+// Latitude and longitude grid
+ctx.strokeStyle = "#ffffff55";
+ctx.lineWidth = 1;
+for(let lat=-60;lat<=60;lat+=15){
+ctx.beginPath();
+let started = false;
+for(let lon=-180;lon<=180;lon+=2){
+const p = project(lon,lat);
+if(p.z>0){
+if(started) ctx.lineTo(p.x,p.y);
+else ctx.moveTo(p.x,p.y);
+started=true;
+} else started=false;
+}
+ctx.stroke();
+}
+for(let lon=-180;lon<180;lon+=15){
+ctx.beginPath();
+let started=false;
+for(let lat=-90;lat<=90;lat+=2){
+const p=project(lon,lat);
+if(p.z>0){
+if(started) ctx.lineTo(p.x,p.y);
+else ctx.moveTo(p.x,p.y);
+started=true;
+} else started=false;
+}
+ctx.stroke();
+}
+// Draw simplified land
+ctx.fillStyle="#91b184";
+land.forEach(continent=>{
+const points=[];
+continent.forEach((a,i)=>{
+const b=continent[(i+1)%continent.length];
+for(let j=0;j<20;j++){
+points.push(project(
+a[0]+(b[0]-a[0])j/20,
+a[1]+(b[1]-a[1])j/20
+));
+}
+});
+const front=points.filter(p=>p.z>0);
+if(front.length<3) return;
+ctx.beginPath();
+front.forEach((p,i)=>{
+if(i===0) ctx.moveTo(p.x,p.y);
+else ctx.lineTo(p.x,p.y);
+});
+ctx.closePath();
+ctx.fill();
+});
+ctx.restore();
+// Draw and separate overlapping pins
+locations.forEach(place=>{
+if(filter!=="All" && place[3]!==filter) return;
+const p=project(place[2],place[1]);
+if(p.z<=0 || p.x<10 || p.x>590 ||
+p.y<10 || p.y>300) return;
+let x=p.x;
+let y=p.y;
+let attempt=0;
+while(visiblePins.some(pin=>
+Math.hypot(pin.x-x,pin.y-y)<19
+) && attempt<100){
+attempt++;
+const angle=attempt2.4;
+const distance=8Math.sqrt(attempt);
+x=p.x+Math.cos(angle)distance;
+y=p.y+Math.sin(angle)distance;
+}
+ctx.strokeStyle=colors[place[3]];
+ctx.lineWidth=1.5;
+ctx.beginPath();
+ctx.moveTo(p.x,p.y);
+ctx.lineTo(x,y);
+ctx.stroke();
+ctx.beginPath();
+ctx.arc(x,y,7,0,Math.PI2);
+ctx.fillStyle=colors[place[3]];
+ctx.fill();
+ctx.strokeStyle="white";
+ctx.lineWidth=2;
+ctx.stroke();
+visiblePins.push({x,y,place});
+});
+}
+let dragging=false;
+let lastX=0;
+let lastY=0;
+let movement=0;
+canvas.addEventListener("pointerdown",e=>{
+dragging=true;
+lastX=e.clientX;
+lastY=e.clientY;
+movement=0;
+canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener("pointermove",e=>{
+if(!dragging) return;
+const dx=e.clientX-lastX;
+const dy=e.clientY-lastY;
+longitude-=dx/zoom0.8;
+latitude=Math.max(-85,Math.min(
+85,latitude+dy/zoom0.8
+));
+movement+=Math.abs(dx)+Math.abs(dy);
+lastX=e.clientX;
+lastY=e.clientY;
+draw();
+});
+canvas.addEventListener("pointerup",e=>{
+dragging=false;
+if(movement<5){
+const rect=canvas.getBoundingClientRect();
+const x=(e.clientX-rect.left)600/rect.width;
+const y=(e.clientY-rect.top)310/rect.height;
+const pin=visiblePins.find(p=>
+Math.hypot(p.x-x,p.y-y)<12
+);
+if(pin){
+info.textContent=pin.place[3]+
+" — "+pin.place[0];
+}
+}
+});
+canvas.addEventListener("pointercancel",()=>{
+dragging=false;
+});
+document.querySelectorAll(
+".showcase [data-hobby]"
+).forEach(button=>{
+button.addEventListener("click",()=>{
+filter=button.dataset.hobby;
+draw();
+});
+});
+document.getElementById("zoomIn").onclick=()=>{
+zoom=Math.min(zoom1.5,30);
+draw();
+};
+document.getElementById("zoomOut").onclick=()=>{
+zoom=Math.max(zoom/1.5,0.8);
+draw();
+};
+document.getElementById("resetGlobe").onclick=()=>{
+longitude=-118;
+latitude=43;
+zoom=1.8;
+filter="All";
+info.textContent="Drag the globe and click a pin!";
+draw();
+};
+draw();
+})();
+</script></div>
 
 <!-- Footer: fill in your name -->
 <footer>Built by Chris Niblock &middot; BMIS 235</footer>
