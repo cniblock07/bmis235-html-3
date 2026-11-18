@@ -223,8 +223,8 @@ continent.forEach((a,i)=>{
 const b=continent[(i+1)%continent.length];
 for(let j=0;j<20;j++){
 points.push(project(
-a[0]+(b[0]-a[0])j/20,
-a[1]+(b[1]-a[1])j/20
+a[0]+(b[0]-a[0])*j/20,
+a[1]+(b[1]-a[1])*j/20
 ));
 }
 });
@@ -252,10 +252,10 @@ while(visiblePins.some(pin=>
 Math.hypot(pin.x-x,pin.y-y)<19
 ) && attempt<100){
 attempt++;
-const angle=attempt2.4;
-const distance=8Math.sqrt(attempt);
-x=p.x+Math.cos(angle)distance;
-y=p.y+Math.sin(angle)distance;
+const angle=attempt*2.4;
+const distance=8*Math.sqrt(attempt);
+x=p.x+Math.cos(angle)*distance;
+y=p.y+Math.sin(angle)*distance;
 }
 ctx.strokeStyle=colors[place[3]];
 ctx.lineWidth=1.5;
@@ -264,7 +264,7 @@ ctx.moveTo(p.x,p.y);
 ctx.lineTo(x,y);
 ctx.stroke();
 ctx.beginPath();
-ctx.arc(x,y,7,0,Math.PI2);
+ctx.arc(x,y,7,0,Math.PI*2);
 ctx.fillStyle=colors[place[3]];
 ctx.fill();
 ctx.strokeStyle="white";
@@ -290,7 +290,7 @@ const dx=e.clientX-lastX;
 const dy=e.clientY-lastY;
 longitude-=dx/zoom0.8;
 latitude=Math.max(-85,Math.min(
-85,latitude+dy/zoom0.8
+85,latitude+dy/zoom*0.8
 ));
 movement+=Math.abs(dx)+Math.abs(dy);
 lastX=e.clientX;
@@ -301,8 +301,8 @@ canvas.addEventListener("pointerup",e=>{
 dragging=false;
 if(movement<5){
 const rect=canvas.getBoundingClientRect();
-const x=(e.clientX-rect.left)600/rect.width;
-const y=(e.clientY-rect.top)310/rect.height;
+const x=(e.clientX-rect.left)*600/rect.width;
+const y=(e.clientY-rect.top)*310/rect.height;
 const pin=visiblePins.find(p=>
 Math.hypot(p.x-x,p.y-y)<12
 );
@@ -324,7 +324,7 @@ draw();
 });
 });
 document.getElementById("zoomIn").onclick=()=>{
-zoom=Math.min(zoom1.5,30);
+zoom=Math.min(zoom*1.5,30);
 draw();
 };
 document.getElementById("zoomOut").onclick=()=>{
