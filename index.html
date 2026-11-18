@@ -177,10 +177,10 @@ ctx.clearRect(0, 0, 600, 310);
 visiblePins = [];
 ctx.save();
 ctx.beginPath();
-ctx.arc(300,155,138zoom,0,Math.PI2);
+ctx.arc(300,155,138*zoom,0,Math.PI*2);
 ctx.clip();
 const ocean = ctx.createRadialGradient(
-240,90,10,300,155,138zoom
+240,90,10,300,155,138*zoom
 );
 ocean.addColorStop(0,"#c5e5f5");
 ocean.addColorStop(1,"#4389b9");
