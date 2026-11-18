@@ -50,6 +50,11 @@ p {
     margin: 20px auto;
     font-size: 18px;
     line-height: 1.5;
+   background-color: #F0F4F8;
+   padding:20px;
+   border-radius:10px;
+   box-shadow:0 4px 8px #CCCCCC;
+   
 }
 
 footer {
